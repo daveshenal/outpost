@@ -1,0 +1,8 @@
+data/documents/
+data/embeddings/
+data/models/
+__pycache__/
+node_modules/
+dist/
+target/
+*.gguf
