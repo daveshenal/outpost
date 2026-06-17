@@ -2,17 +2,81 @@
 
 ![Status](https://img.shields.io/badge/status-active--development-red)
 
-A local-first AI system that runs completely offline, self-contained, no cloud dependency, no internet required
+**Run LLMs locally. No internet. No limits. No cost per token.**
 
-## Features - Planned
+A self-hosted AI workstation with a native desktop app, full CLI, document Q&A (RAG), and multi-model support.
 
-- Local AI assistant/chat application
-- RAG document ingestion
-- Backend API (server.py)
-- CLI tooling (cli.py)
-- React frontend (App.jsx, pages)
-- Installation scripts (install.sh, install.ps1)
-- Packaged for end users?
+---
+
+## Quick Start
+
+### Requirements
+- Python 3.10+, Node.js 18+, Rust (stable)
+- Ollama + Qdrant (installed automatically)
+- NVIDIA GPU recommended (RTX 3070 = sweet spot)
+
+### Install
+
+**Linux / macOS:**
+```bash
+chmod +x installer/install.sh && ./installer/install.sh
+```
+
+**Windows (PowerShell as Admin):**
+```powershell
+.\installer\install.ps1
+```
+
+### First run
+```bash
+~/.localai/start.sh          # start services
+localai models pull llama3.1:8b
+localai chat
+```
+
+---
+
+## CLI
+```bash
+localai serve                          # start backend
+localai chat                           # interactive chat
+localai chat --model deepseek-coder-v2:16b
+localai models list / pull / delete
+localai docs add ./file.pdf
+localai docs list
+localai status
+```
+
+---
+
+## Architecture
+```
+Tauri Desktop App (React)
+        │
+FastAPI Backend :8765
+  ├── /chat  (streaming SSE)
+  ├── /v1/*  (OpenAI-compatible)
+  ├── /models
+  └── /documents (RAG)
+        │
+   Ollama :11434    Qdrant :6333
+```
+
+## Recommended Models (RTX 3070 / 8GB VRAM)
+| Model | VRAM | Best for |
+|-------|------|----------|
+| llama3.2:3b | ~3 GB | Fast tasks |
+| llama3.1:8b | ~6 GB | General (recommended) |
+| deepseek-coder-v2:16b | ~10 GB* | Coding |
+| nomic-embed-text | ~1 GB | **Required for RAG** |
+
+## OpenAI-Compatible API
+```python
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8765/v1", api_key="local")
+```
+
+Config: `~/.localai/config.json`
 
 ## Project Structure
 
