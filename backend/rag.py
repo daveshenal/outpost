@@ -49,7 +49,7 @@ class RAGService:
                 )
             print(f"[RAG] Connected to Qdrant, collection '{COLLECTION}' ready")
         except Exception as e:
-            print(f"[RAG] Qdrant not available: {e} — RAG disabled")
+            print(f"[RAG] Qdrant not available: {e} - RAG disabled")
             self.client = None
 
     # ── Embedding ─────────────────────────────────────────────────────────────
