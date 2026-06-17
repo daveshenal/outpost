@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useStore } from './store'
-import Sidebar from './components/shared/Sidebar'
-import ChatPage from './components/chat/ChatPage'
-import ModelsPage from './components/models/ModelsPage'
-import DocumentsPage from './components/documents/DocumentsPage'
-import SettingsPage from './components/settings/SettingsPage'
+import Sidebar from './components/Sidebar'
+import ChatPage from './pages/ChatPage'
+import ModelsPage from './pages/ModelsPage'
+import DocumentsPage from './pages/DocumentsPage'
+import SettingsPage from './pages/SettingsPage'
 import './index.css'
 
 const PAGES = {

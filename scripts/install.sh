@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 BOLD='\033[1m'
 CYAN='\033[36m'
 GREEN='\033[32m'
@@ -35,13 +37,12 @@ fi
 NODE_VERSION=$(node --version)
 echo -e "  Node:   ${CYAN}${NODE_VERSION}${RESET}"
 
-# ── Rust (for Tauri) ──────────────────────────────────────────────────────────
-if ! command -v cargo &>/dev/null; then
-  echo -e "${YELLOW}  Rust not found — installing via rustup…${RESET}"
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet
-  source "$HOME/.cargo/env"
+# ── Rust (optional, for future desktop packaging) ─────────────────────────────
+if command -v cargo &>/dev/null; then
+  echo -e "  Rust:   ${CYAN}$(rustc --version)${RESET}"
+else
+  echo -e "  Rust:   not installed (optional)"
 fi
-echo -e "  Rust:   ${CYAN}$(rustc --version)${RESET}"
 
 # ── Ollama ────────────────────────────────────────────────────────────────────
 if ! command -v ollama &>/dev/null; then
@@ -71,30 +72,32 @@ fi
 # ── Python deps ───────────────────────────────────────────────────────────────
 echo ""
 echo -e "  Installing Python dependencies…"
-pip3 install -r backend/requirements.txt -q
+pip3 install -r "$REPO_ROOT/backend/requirements.txt" -q
 
-# ── Node deps + build ─────────────────────────────────────────────────────────
+# ── Node deps + frontend build ────────────────────────────────────────────────
 echo -e "  Installing Node dependencies…"
+cd "$REPO_ROOT/frontend"
 npm install --silent
 
-echo -e "  Building desktop app…"
-npm run tauri build 2>&1 | tail -5
+echo -e "  Building frontend…"
+npm run build
 
 # ── CLI shortcut ──────────────────────────────────────────────────────────────
-cat > /usr/local/bin/localai << 'SCRIPT'
+cat > /usr/local/bin/localai << SCRIPT
 #!/usr/bin/env bash
-cd "$(dirname "$(readlink -f "$0")")"
-python3 -m backend.cli "$@"
+cd "$REPO_ROOT"
+python3 -m cli.cli "\$@"
 SCRIPT
 chmod +x /usr/local/bin/localai 2>/dev/null || true
 
 # ── Launch script ─────────────────────────────────────────────────────────────
-cat > "$HOME/.localai/start.sh" << 'LAUNCH'
+cat > "$HOME/.localai/start.sh" << LAUNCH
 #!/usr/bin/env bash
+cd "$REPO_ROOT"
 # Start Ollama
 ollama serve &>/dev/null &
 
-# Start Qdrant  
+# Start Qdrant
 ~/.localai/qdrant/qdrant --storage-path ~/.localai/qdrant/storage &>/dev/null &
 
 # Start backend
@@ -107,7 +110,7 @@ chmod +x "$HOME/.localai/start.sh"
 echo ""
 echo -e "${GREEN}${BOLD}✓ Installation complete!${RESET}"
 echo ""
-echo -e "  Start the app:      ${CYAN}open dist/LocalAI.app${RESET}  (or the built binary)"
+echo -e "  Frontend:           ${CYAN}$REPO_ROOT/frontend/dist${RESET}"
 echo -e "  Start services:     ${CYAN}~/.localai/start.sh${RESET}"
 echo -e "  Use the CLI:        ${CYAN}localai chat${RESET}"
 echo -e "  Pull a model first: ${CYAN}localai models pull llama3.1:8b${RESET}"

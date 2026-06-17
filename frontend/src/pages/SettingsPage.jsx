@@ -1,5 +1,39 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Settings, Server, Database, Cpu, Save } from 'lucide-react'
+
+const API = 'http://localhost:8765'
+
+function fromApi(data) {
+  return {
+    ollamaHost: data.ollama_host ?? 'localhost',
+    ollamaPort: String(data.ollama_port ?? 11434),
+    backendPort: String(data.backend_port ?? 8765),
+    qdrantPort: String(data.qdrant_port ?? 6333),
+    contextLength: String(data.context_length ?? 4096),
+    temperature: String(data.temperature ?? 0.7),
+    systemPrompt: data.system_prompt ?? 'You are a helpful AI assistant running locally.',
+    ragEnabled: data.rag_enabled ?? true,
+    ragTopK: String(data.rag_top_k ?? 5),
+    streamEnabled: data.stream_enabled ?? true,
+    gpuLayers: String(data.gpu_layers ?? 99),
+  }
+}
+
+function toApi(cfg) {
+  return {
+    ollama_host: cfg.ollamaHost,
+    ollama_port: parseInt(cfg.ollamaPort, 10),
+    backend_port: parseInt(cfg.backendPort, 10),
+    qdrant_port: parseInt(cfg.qdrantPort, 10),
+    context_length: parseInt(cfg.contextLength, 10),
+    temperature: parseFloat(cfg.temperature),
+    system_prompt: cfg.systemPrompt,
+    rag_enabled: cfg.ragEnabled,
+    rag_top_k: parseInt(cfg.ragTopK, 10),
+    stream_enabled: cfg.streamEnabled,
+    gpu_layers: parseInt(cfg.gpuLayers, 10),
+  }
+}
 
 const Section = ({ icon: Icon, title, children }) => (
   <div style={{ marginBottom: 24 }}>
@@ -61,28 +95,23 @@ const Toggle = ({ value, onChange }) => (
 )
 
 export default function SettingsPage() {
-  const [cfg, setCfg] = useState({
-    ollamaHost: 'localhost',
-    ollamaPort: '11434',
-    backendPort: '8765',
-    qdrantPort: '6333',
-    contextLength: '4096',
-    temperature: '0.7',
-    systemPrompt: 'You are a helpful AI assistant running locally.',
-    ragEnabled: true,
-    ragTopK: '5',
-    streamEnabled: true,
-    gpuLayers: '99',
-  })
+  const [cfg, setCfg] = useState(fromApi({}))
   const set = (k) => (v) => setCfg(c => ({ ...c, [k]: v }))
   const [saved, setSaved] = useState(false)
 
+  useEffect(() => {
+    fetch(`${API}/config`)
+      .then(r => r.json())
+      .then(data => setCfg(fromApi(data)))
+      .catch(() => {})
+  }, [])
+
   const save = async () => {
     try {
-      await fetch('http://localhost:8765/config', {
+      await fetch(`${API}/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cfg),
+        body: JSON.stringify(toApi(cfg)),
       })
     } catch {}
     setSaved(true)
