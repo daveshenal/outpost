@@ -1,4 +1,4 @@
-# Outpost
+# <img src="assests/castle.png" width="40" valign="middle"> Outpost
 
 ![Status](https://img.shields.io/badge/status-active--development-red)
 
