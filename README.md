@@ -2,6 +2,16 @@
 
 A local-first AI system that runs completely offline, self-contained, no cloud dependency, no internet required
 
+## Features - Planned
+
+- Local AI assistant/chat application
+- RAG document ingestion
+- Backend API (server.py)
+- CLI tooling (cli.py)
+- React frontend (App.jsx, pages)
+- Installation scripts (install.sh, install.ps1)
+- Packaged for end users?
+
 ## Project Structure
 
 ```
