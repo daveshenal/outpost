@@ -1,4 +1,4 @@
-import { useStore } from '../../store'
+import { useStore } from '../store'
 import { MessageSquare, Package, FileText, Settings, Plus, Trash2, Cpu } from 'lucide-react'
 
 const NAV = [

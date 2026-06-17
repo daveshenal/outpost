@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useStore } from '../../store'
+import { useStore } from '../store'
 import { Upload, Trash2, CheckCircle, Loader, File } from 'lucide-react'
 
 function DocCard({ doc, onDelete }) {

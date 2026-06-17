@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useStore } from '../../store'
+import { useStore } from '../store'
 import { Send, Bot, User, Loader, Plus } from 'lucide-react'
 
 function Message({ msg }) {

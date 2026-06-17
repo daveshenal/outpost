@@ -2,6 +2,7 @@
 # Run as: .\install.ps1
 
 $ErrorActionPreference = "Stop"
+$RepoRoot = Split-Path -Parent $PSScriptRoot
 
 Write-Host ""
 Write-Host "LocalAI Installer" -ForegroundColor Cyan -NoNewline
@@ -27,14 +28,12 @@ try {
     exit 1
 }
 
-# ── Rust ──────────────────────────────────────────────────────────────────────
-if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
-    Write-Host "  Rust not found. Install from https://rustup.rs" -ForegroundColor Yellow
-    Write-Host "  Then re-run this installer." -ForegroundColor Yellow
-    Start-Process "https://rustup.rs"
-    exit 1
+# ── Rust (optional, for future desktop packaging) ─────────────────────────────
+if (Get-Command cargo -ErrorAction SilentlyContinue) {
+    Write-Host "  Rust:   " -NoNewline; Write-Host (rustc --version) -ForegroundColor Cyan
+} else {
+    Write-Host "  Rust:   not installed (optional)" -ForegroundColor DarkGray
 }
-Write-Host "  Rust:   " -NoNewline; Write-Host (rustc --version) -ForegroundColor Cyan
 
 # ── Ollama ────────────────────────────────────────────────────────────────────
 if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
@@ -60,18 +59,21 @@ if (-not (Test-Path "$qdrantDir\qdrant.exe")) {
 
 # ── Python deps ───────────────────────────────────────────────────────────────
 Write-Host "  Installing Python dependencies..." -ForegroundColor Yellow
+Set-Location $RepoRoot
 pip install -r backend\requirements.txt -q
 
-# ── Node deps + Tauri build ───────────────────────────────────────────────────
+# ── Node deps + frontend build ────────────────────────────────────────────────
 Write-Host "  Installing Node dependencies..." -ForegroundColor Yellow
+Set-Location "$RepoRoot\frontend"
 npm install --silent
 
-Write-Host "  Building desktop app..." -ForegroundColor Yellow
-npm run tauri build
+Write-Host "  Building frontend..." -ForegroundColor Yellow
+npm run build
 
 # ── Start script ──────────────────────────────────────────────────────────────
 $startScript = @"
 @echo off
+cd /d "$RepoRoot"
 start /B ollama serve
 start /B "$qdrantDir\qdrant.exe" --storage-path "%USERPROFILE%\.localai\qdrant\storage"
 start /B python -m uvicorn backend.server:app --host 127.0.0.1 --port 8765
@@ -84,7 +86,8 @@ $startScript | Out-File -FilePath "$env:USERPROFILE\.localai\start.bat" -Encodin
 # ── CLI shortcut ──────────────────────────────────────────────────────────────
 $cliScript = @"
 @echo off
-python -m backend.cli %*
+cd /d "$RepoRoot"
+python -m cli.cli %*
 "@
 $cliScript | Out-File -FilePath "C:\Windows\localai.bat" -Encoding ASCII -ErrorAction SilentlyContinue
 
@@ -94,4 +97,5 @@ Write-Host ""
 Write-Host "  Start services: " -NoNewline; Write-Host "%USERPROFILE%\.localai\start.bat" -ForegroundColor Cyan
 Write-Host "  Use the CLI:    " -NoNewline; Write-Host "localai chat" -ForegroundColor Cyan
 Write-Host "  Pull a model:   " -NoNewline; Write-Host "localai models pull llama3.1:8b" -ForegroundColor Cyan
+Write-Host "  Frontend:       " -NoNewline; Write-Host "$RepoRoot\frontend\dist" -ForegroundColor Cyan
 Write-Host ""

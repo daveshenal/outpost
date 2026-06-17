@@ -1,3 +1,11 @@
-pydantic
-qdrant_client
 fastapi
+uvicorn[standard]
+httpx
+pydantic
+python-multipart
+qdrant-client
+typer
+rich
+pypdf
+python-docx
+langchain-text-splitters
