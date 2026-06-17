@@ -150,7 +150,7 @@ export default function DocumentsPage() {
           fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7,
         }}>
           <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>How it works</div>
-          Documents are chunked, embedded locally using <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>nomic-embed-text</span>, and stored in a local Qdrant vector database. When you ask a question, relevant chunks are retrieved and injected into the prompt — all offline.
+          Documents are chunked, embedded locally using <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>nomic-embed-text</span>, and stored in a local Qdrant vector database. When you ask a question, relevant chunks are retrieved and injected into the prompt - all offline.
         </div>
       </div>
     </div>

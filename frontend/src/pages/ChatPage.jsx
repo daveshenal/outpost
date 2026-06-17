@@ -154,7 +154,7 @@ export default function ChatPage() {
             background: 'var(--amber)15', border: '1px solid var(--amber)40',
             fontSize: 12, color: 'var(--amber)',
           }}>
-            No model selected — <button onClick={() => setPage('models')} style={{ color: 'var(--amber)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>download one</button>
+            No model selected - <button onClick={() => setPage('models')} style={{ color: 'var(--amber)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>download one</button>
           </div>
         )}
         <div style={{
