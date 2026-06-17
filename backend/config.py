@@ -6,19 +6,19 @@ CONFIG_PATH = Path.home() / ".localai" / "config.json"
 
 
 class Config(BaseModel):
-    ollama_host: str =
-    ollama_port: int =
-    backend_port: int =
-    qdrant_host: str =
-    qdrant_port: int =
-    context_length: int =
-    temperature: float =
-    gpu_layers: int =
+    ollama_host: str = "localhost"
+    ollama_port: int = 11434
+    backend_port: int = 8765
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    context_length: int = 4096
+    temperature: float = 0.7
+    gpu_layers: int = 99
     system_prompt: str = "You are a helpful AI assistant running locally." # Prompt management will be added later...
-    rag_enabled: bool =
-    rag_top_k: int =
-    stream_enabled: bool =
-    embed_model: str =
+    rag_enabled: bool = True
+    rag_top_k: int = 5
+    stream_enabled: bool = True
+    embed_model: str = "nomic-embed-text"
 
     @property
     def ollama_url(self) -> str:
