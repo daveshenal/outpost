@@ -177,7 +177,7 @@ export default function ChatPage() {
             value={input}
             onChange={handleInput}
             onKeyDown={handleKey}
-            placeholder={activeModel ? 'Message… (Shift+Enter for newline)' : 'Select a model to start'}
+            placeholder={activeModel ? 'Write a message...' : 'Select a model to start'}
             disabled={!activeModel || streaming}
             rows={1}
             style={{
