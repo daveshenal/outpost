@@ -67,7 +67,13 @@ def chat(
         if not models:
             console.print("[yellow]No models installed.[/yellow] Run: [cyan]localai models pull llama3.1:8b[/cyan]")
             raise typer.Exit(1)
-        model = models[0]["name"]
+        
+        chat_models = [m for m in models if "embed" not in m["name"].lower()]
+        if not chat_models:
+            console.print("[yellow]No chat models found.[/yellow] Run: [cyan]localai models pull llama3.2:3b[/cyan]")
+            raise typer.Exit(1)
+        model = chat_models[0]["name"]
+        
         console.print(f"[dim]Using model:[/dim] [cyan]{model}[/cyan]")
 
     console.print(Panel(
