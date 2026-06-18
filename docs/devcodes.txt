@@ -9,7 +9,10 @@ copy .\dist\outpost-backend.exe .\frontend\src-tauri\binaries\outpost-backend-x8
 
 Then test the full system
 cd frontend
-npm run tauri dev 
+npm run tauri dev
+
+If the sidecar exe is locked. Kill it first:
+taskkill /IM outpost-backend.exe /F
 
 # In a new terminal (no venv needed, use the exe directly)
 python cli/cli.py status
