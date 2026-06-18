@@ -67,7 +67,13 @@ def chat(
         if not models:
             console.print("[yellow]No models installed.[/yellow] Run: [cyan]localai models pull llama3.1:8b[/cyan]")
             raise typer.Exit(1)
-        model = models[0]["name"]
+        
+        chat_models = [m for m in models if "embed" not in m["name"].lower()]
+        if not chat_models:
+            console.print("[yellow]No chat models found.[/yellow] Run: [cyan]localai models pull llama3.2:3b[/cyan]")
+            raise typer.Exit(1)
+        model = chat_models[0]["name"]
+        
         console.print(f"[dim]Using model:[/dim] [cyan]{model}[/cyan]")
 
     console.print(Panel(
@@ -198,11 +204,12 @@ def docs_list():
         console.print("[dim]No documents indexed.[/dim]")
         return
     table = Table(show_header=True, header_style="bold", border_style="bright_black")
+    table.add_column("ID", style="dim", no_wrap=True)   # ← add this
     table.add_column("Name", style="cyan")
     table.add_column("Chunks", justify="right")
     table.add_column("Size", justify="right")
     for d in docs:
-        table.add_row(d["name"], str(d["chunks"]), d["size"])
+        table.add_row(d.get("id", "-"), d["name"], str(d.get("chunks", "?")), d.get("size", "-"))  # ← add id
     console.print(table)
 
 
