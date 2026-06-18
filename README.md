@@ -19,12 +19,12 @@ A self-hosted AI workstation with a native desktop app, full CLI, document Q&A (
 
 **Linux / macOS:**
 ```bash
-chmod +x installer/install.sh && ./installer/install.sh
+chmod +x install.sh && ./install.sh
 ```
 
 **Windows (PowerShell as Admin):**
 ```powershell
-.\installer\install.ps1
+.\install.ps1
 ```
 
 ### First run
@@ -108,9 +108,8 @@ project-name/
 ├── cli/
 │   └── cli.py
 │
-├── scripts/
-│   ├── install.sh
-│   └── install.ps1
+├── install.sh
+├── install.ps1
 │
 ├── docs/
 │

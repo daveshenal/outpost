@@ -2,7 +2,7 @@
 # Run as: .\install.ps1
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = Split-Path -Parent $PSScriptRoot
+$RepoRoot = $PSScriptRoot
 
 Write-Host ""
 Write-Host "LocalAI Installer" -ForegroundColor Cyan -NoNewline

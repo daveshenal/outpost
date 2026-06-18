@@ -1,9 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+dist/
+.venv/
+
+# Build / packaging
+.venv-build/
+build/
+dist/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Tauri / Rust
+frontend/src-tauri/target/
+frontend/src-tauri/WixTools/
+*.pdb
+
+# Data — never commit models or user data
+data/models/
 data/documents/
 data/embeddings/
-data/models/
-__pycache__/
-node_modules/
-dist/
-target/
 *.gguf
-.vscode/settings.json
+*.bin
+*.safetensors
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# .exe
+*.exe
