@@ -209,7 +209,7 @@ def docs_list():
     table.add_column("Chunks", justify="right")
     table.add_column("Size", justify="right")
     for d in docs:
-        table.add_row(d.get("id", "—"), d["name"], str(d.get("chunks", "?")), d.get("size", "—"))  # ← add id
+        table.add_row(d.get("id", "-"), d["name"], str(d.get("chunks", "?")), d.get("size", "-"))  # ← add id
     console.print(table)
 
 
