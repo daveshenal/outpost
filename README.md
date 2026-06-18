@@ -1,4 +1,4 @@
-# <img src="assests/icon.png" width="60" valign="middle"> Outpost - Offline AI Station
+# <img src="assests/icon-512.png" width="60" valign="middle"> Outpost - Offline AI Station
 
 ![Status](https://img.shields.io/badge/status-active--development-red)
 
