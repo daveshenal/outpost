@@ -1,5 +1,6 @@
 import { useStore } from '../store'
 import { MessageSquare, Package, FileText, Settings, Plus, Trash2, Cpu } from 'lucide-react'
+import outpostIcon from '../assets/icon-64.png'
 
 const NAV = [
   { id: 'chat',      icon: MessageSquare, label: 'Chat' },
@@ -36,15 +37,9 @@ export default function Sidebar() {
         alignItems: 'center',
         gap: 10,
       }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 8,
-          background: 'var(--accent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Cpu size={15} color="white" />
-        </div>
+        <img src={outpostIcon} width={32} height={32} />
         <div>
-          <div style={{ fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>Outpost</div>
+          <div style={{ fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>OUTPOST</div>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{
               width: 5, height: 5, borderRadius: '50%',
