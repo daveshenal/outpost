@@ -204,11 +204,12 @@ def docs_list():
         console.print("[dim]No documents indexed.[/dim]")
         return
     table = Table(show_header=True, header_style="bold", border_style="bright_black")
+    table.add_column("ID", style="dim", no_wrap=True)   # ← add this
     table.add_column("Name", style="cyan")
     table.add_column("Chunks", justify="right")
     table.add_column("Size", justify="right")
     for d in docs:
-        table.add_row(d["name"], str(d.get("chunks", "?")), d.get("size", "—"))
+        table.add_row(d.get("id", "—"), d["name"], str(d.get("chunks", "?")), d.get("size", "—"))  # ← add id
     console.print(table)
 
 
