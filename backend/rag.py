@@ -116,7 +116,7 @@ class RAGService:
 
         ids = [str(uuid.uuid4()) for _ in chunks]
         metadatas = [
-            {"doc_id": doc_id, "filename": filename, "chunk_idx": i}
+            {"doc_id": doc_id, "filename": filename, "chunk_idx": i, "size": size_str}
             for i in range(len(chunks))
         ]
 
@@ -167,7 +167,8 @@ class RAGService:
                     docs[doc_id] = {
                         "id": doc_id,
                         "name": m.get("filename", "unknown"),
-                        "chunks": 0
+                        "chunks": 0,
+                        "size": m.get("size", "-")   # ← add this
                     }
                 docs[doc_id]["chunks"] += 1
             return list(docs.values())
