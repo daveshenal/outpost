@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-LocalAI CLI
-Terminal interface to the LocalAI backend
-Usage: localai chat / localai models / localai docs
+Outpost CLI
+Terminal interface to the Outpost backend
+Usage: Outpost chat / Outpost models / Outpost docs
 """
 
 import json
@@ -15,8 +15,8 @@ from rich.prompt import Prompt
 from typing import Optional
 
 app = typer.Typer(
-    name="localai",
-    help="LocalAI - run LLMs locally, no internet required",
+    name="Outpost",
+    help="Outpost - run LLMs locally, no internet required",
     add_completion=False,
 )
 
@@ -29,8 +29,8 @@ def _api(method: str, path: str, **kwargs) -> dict:
         r = httpx.request(method, f"{API}{path}", timeout=10, **kwargs)
         return r.json()
     except httpx.ConnectError:
-        console.print("[red]✗ LocalAI backend is not running.[/red]")
-        console.print("  Start it with: [cyan]localai serve[/cyan]")
+        console.print("[red]✗ Outpost backend is not running.[/red]")
+        console.print("  Start it with: [cyan]Outpost serve[/cyan]")
         raise typer.Exit(1)
 
 
@@ -41,10 +41,10 @@ def serve(
     port: int = typer.Option(8765, help="Port to listen on"),
     host: str = typer.Option("127.0.0.1", help="Host to bind to"),
 ):
-    """Start the LocalAI backend server"""
+    """Start the Outpost backend server"""
     import uvicorn
     console.print(Panel(
-        f"[bold]LocalAI[/bold] backend starting on [cyan]http://{host}:{port}[/cyan]",
+        f"[bold]Outpost[/bold] backend starting on [cyan]http://{host}:{port}[/cyan]",
         border_style="bright_black"
     ))
     uvicorn.run("backend.server:app", host=host, port=port, reload=False)
@@ -65,12 +65,12 @@ def chat(
         data = _api("GET", "/models")
         models = data.get("models", [])
         if not models:
-            console.print("[yellow]No models installed.[/yellow] Run: [cyan]localai models pull llama3.1:8b[/cyan]")
+            console.print("[yellow]No models installed.[/yellow] Run: [cyan]Outpost models pull llama3.1:8b[/cyan]")
             raise typer.Exit(1)
         
         chat_models = [m for m in models if "embed" not in m["name"].lower()]
         if not chat_models:
-            console.print("[yellow]No chat models found.[/yellow] Run: [cyan]localai models pull llama3.2:3b[/cyan]")
+            console.print("[yellow]No chat models found.[/yellow] Run: [cyan]Outpost models pull llama3.2:3b[/cyan]")
             raise typer.Exit(1)
         model = chat_models[0]["name"]
         
@@ -252,7 +252,7 @@ def status():
         f"[green]● Backend[/green]  v{data.get('version', '?')}\n"
         f"[cyan]● Models[/cyan]   {len(models_data.get('models', []))} installed\n"
         f"[cyan]● Docs[/cyan]     {len(docs_data.get('documents', []))} indexed",
-        title="LocalAI Status", border_style="bright_black"
+        title="Outpost Status", border_style="bright_black"
     ))
 
 

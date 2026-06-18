@@ -1,5 +1,5 @@
 """
-LocalAI Backend - FastAPI server
+Outpost Backend - FastAPI server
 Bridges the Tauri UI and CLI to Ollama + Qdrant
 """
 
@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from .rag import RAGService
 from .config import load_config, save_config, Config
 
-app = FastAPI(title="LocalAI", version="0.1.0")
+app = FastAPI(title="Outpost", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

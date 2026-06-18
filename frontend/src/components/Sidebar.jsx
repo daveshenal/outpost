@@ -44,7 +44,7 @@ export default function Sidebar() {
           <Cpu size={15} color="white" />
         </div>
         <div>
-          <div style={{ fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>LocalAI</div>
+          <div style={{ fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>Outpost</div>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{
               width: 5, height: 5, borderRadius: '50%',

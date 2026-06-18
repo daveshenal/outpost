@@ -1,11 +1,11 @@
-# LocalAI Windows Installer
+# Outpost Windows Installer
 # Run as: .\install.ps1
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = $PSScriptRoot
 
 Write-Host ""
-Write-Host "LocalAI Installer" -ForegroundColor Cyan -NoNewline
+Write-Host "Outpost Installer" -ForegroundColor Cyan -NoNewline
 Write-Host " (Windows)"
 Write-Host "─────────────────────────────────────" -ForegroundColor DarkGray
 Write-Host ""
@@ -47,7 +47,7 @@ if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
 }
 
 # ── Qdrant ────────────────────────────────────────────────────────────────────
-$qdrantDir = "$env:USERPROFILE\.localai\qdrant"
+$qdrantDir = "$env:USERPROFILE\.Outpost\qdrant"
 if (-not (Test-Path "$qdrantDir\qdrant.exe")) {
     Write-Host "  Downloading Qdrant..." -ForegroundColor Yellow
     New-Item -ItemType Directory -Force -Path $qdrantDir | Out-Null
@@ -75,13 +75,13 @@ $startScript = @"
 @echo off
 cd /d "$RepoRoot"
 start /B ollama serve
-start /B "$qdrantDir\qdrant.exe" --storage-path "%USERPROFILE%\.localai\qdrant\storage"
+start /B "$qdrantDir\qdrant.exe" --storage-path "%USERPROFILE%\.Outpost\qdrant\storage"
 start /B python -m uvicorn backend.server:app --host 127.0.0.1 --port 8765
-echo LocalAI services started
+echo Outpost services started
 "@
 
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.localai" | Out-Null
-$startScript | Out-File -FilePath "$env:USERPROFILE\.localai\start.bat" -Encoding ASCII
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.Outpost" | Out-Null
+$startScript | Out-File -FilePath "$env:USERPROFILE\.Outpost\start.bat" -Encoding ASCII
 
 # ── CLI shortcut ──────────────────────────────────────────────────────────────
 $cliScript = @"
@@ -89,13 +89,13 @@ $cliScript = @"
 cd /d "$RepoRoot"
 python -m cli.cli %*
 "@
-$cliScript | Out-File -FilePath "C:\Windows\localai.bat" -Encoding ASCII -ErrorAction SilentlyContinue
+$cliScript | Out-File -FilePath "C:\Windows\Outpost.bat" -Encoding ASCII -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "Installation complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Start services: " -NoNewline; Write-Host "%USERPROFILE%\.localai\start.bat" -ForegroundColor Cyan
-Write-Host "  Use the CLI:    " -NoNewline; Write-Host "localai chat" -ForegroundColor Cyan
-Write-Host "  Pull a model:   " -NoNewline; Write-Host "localai models pull llama3.1:8b" -ForegroundColor Cyan
+Write-Host "  Start services: " -NoNewline; Write-Host "%USERPROFILE%\.Outpost\start.bat" -ForegroundColor Cyan
+Write-Host "  Use the CLI:    " -NoNewline; Write-Host "Outpost chat" -ForegroundColor Cyan
+Write-Host "  Pull a model:   " -NoNewline; Write-Host "Outpost models pull llama3.1:8b" -ForegroundColor Cyan
 Write-Host "  Frontend:       " -NoNewline; Write-Host "$RepoRoot\frontend\dist" -ForegroundColor Cyan
 Write-Host ""
