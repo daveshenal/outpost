@@ -1,6 +1,10 @@
+use tauri::Manager;
+use tauri_plugin_shell::ShellExt;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_shell::init())
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
@@ -9,6 +13,15 @@ pub fn run() {
             .build(),
         )?;
       }
+
+      // Start the backend sidecar
+      let _sidecar = app
+        .shell()
+        .sidecar("outpost-backend")
+        .expect("failed to find sidecar binary")
+        .spawn()
+        .expect("failed to spawn outpost-backend");
+
       Ok(())
     })
     .run(tauri::generate_context!())
