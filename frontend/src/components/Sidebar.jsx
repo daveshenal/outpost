@@ -73,13 +73,15 @@ export default function Sidebar() {
 
       {/* Conversations (only show on chat page) */}
       {page === 'chat' && (
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', marginTop: 12 }}>
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
           <div style={{
-            padding: '0 8px 6px',
+            marginTop: '12px',
+            borderTop: '1px solid var(--border)',
+            padding: '8px 10px 8px 12px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              Chats
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px'}}>
+              Recent chats
             </span>
             <button onClick={() => { createConversation(); setPage('chat') }} style={{
               width: 22, height: 22, borderRadius: 5,
@@ -133,12 +135,13 @@ export default function Sidebar() {
       {/* Active model footer */}
       <div style={{
         padding: '10px 12px',
+        marginTop: '12px',
         borderTop: '1px solid var(--border)',
-        fontSize: 11,
+        fontSize: 12,
         color: 'var(--text-muted)',
         display: 'flex', alignItems: 'center', gap: 6,
       }}>
-        <Cpu size={11} />
+        <Cpu size={12} />
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {activeModel || 'No model selected'}
         </span>
