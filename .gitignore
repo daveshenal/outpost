@@ -39,3 +39,6 @@ desktop.ini
 .idea/
 *.suo
 *.user
+
+# .exe
+*.exe
