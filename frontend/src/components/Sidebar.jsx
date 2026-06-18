@@ -31,16 +31,16 @@ export default function Sidebar() {
     }}>
       {/* Logo */}
       <div style={{
-        padding: '16px 16px 12px',
+        padding: '16px 20px',
         borderBottom: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
+        gap: 12,
       }}>
-        <img src={outpostIcon} width={32} height={32} />
+        <img src={outpostIcon} width={38} height={38} />
         <div>
-          <div style={{ fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>OUTPOST</div>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, letterSpacing: '-0.2px', marginBottom: 2 }}>OUTPOST</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{
               width: 5, height: 5, borderRadius: '50%',
               background: backendReady ? 'var(--green)' : 'var(--amber)',
