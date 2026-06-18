@@ -56,7 +56,7 @@ export default function Sidebar() {
         {NAV.map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => setPage(id)} style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+            padding: '8px 10px', margin: '4px 0', borderRadius: 'var(--radius-sm)',
             color: page === id ? 'var(--text-primary)' : 'var(--text-secondary)',
             background: page === id ? 'var(--bg-hover)' : 'transparent',
             fontSize: 13, fontWeight: page === id ? 500 : 400,
@@ -93,7 +93,7 @@ export default function Sidebar() {
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 8px' }}>
             {conversations.length === 0 ? (
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 2px' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 4px'}}>
                 No chats yet
               </div>
             ) : conversations.map(conv => (
@@ -101,7 +101,7 @@ export default function Sidebar() {
                 onClick={() => setActiveConv(conv.id)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '7px 8px', borderRadius: 'var(--radius-sm)', marginBottom: 1, cursor: 'pointer',
+                  padding: '7px 8px', borderRadius: 'var(--radius-sm)', marginBottom: 4, cursor: 'pointer',
                   background: activeConvId === conv.id ? 'var(--bg-hover)' : 'transparent',
                   group: true,
                 }}
