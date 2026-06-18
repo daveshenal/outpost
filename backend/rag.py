@@ -115,8 +115,9 @@ class RAGService:
         vectors = await self._embed(chunks)
 
         ids = [str(uuid.uuid4()) for _ in chunks]
+        size_str = f"{len(content)/1024:.1f} KB" if len(content) < 1e6 else f"{len(content)/1e6:.1f} MB"
         metadatas = [
-            {"doc_id": doc_id, "filename": filename, "chunk_idx": i}
+            {"doc_id": doc_id, "filename": filename, "chunk_idx": i, "size": size_str}
             for i in range(len(chunks))
         ]
 
@@ -127,7 +128,6 @@ class RAGService:
             metadatas=metadatas,
         )
 
-        size_str = f"{len(content)/1024:.1f} KB" if len(content) < 1e6 else f"{len(content)/1e6:.1f} MB"
         return {"doc_id": doc_id, "chunks": len(chunks), "size": size_str, "status": "indexed"}
 
     async def retrieve(self, query: str, top_k: int = 5) -> str:
@@ -167,7 +167,8 @@ class RAGService:
                     docs[doc_id] = {
                         "id": doc_id,
                         "name": m.get("filename", "unknown"),
-                        "chunks": 0
+                        "chunks": 0,
+                        "size": m.get("size", "—")   # ← add this
                     }
                 docs[doc_id]["chunks"] += 1
             return list(docs.values())
