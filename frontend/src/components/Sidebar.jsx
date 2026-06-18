@@ -52,7 +52,7 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav style={{ padding: '8px 8px 0' }}>
+      <nav style={{ padding: '8px' }}>
         {NAV.map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => setPage(id)} style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
