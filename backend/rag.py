@@ -1,61 +1,48 @@
 """
 RAG Service
-Ingests documents → chunks → embeds via Ollama → stores in Qdrant
+Ingests documents → chunks → embeds via Ollama → stores in ChromaDB
 Retrieves relevant chunks for query augmentation
 """
 
 import io
 import uuid
 from pathlib import Path
-from typing import Optional
 
 import httpx
+import chromadb
+from chromadb.config import Settings
 
-try:
-    from qdrant_client import AsyncQdrantClient
-    from qdrant_client.models import (
-        Distance, VectorParams, PointStruct, Filter,
-        FieldCondition, MatchValue
-    )
-    QDRANT_AVAILABLE = True
-except ImportError:
-    QDRANT_AVAILABLE = False
-
-COLLECTION = "localai_docs"
+COLLECTION = "outpost_docs"
 EMBED_DIM  = 768  # nomic-embed-text output size
+DB_PATH    = Path.home() / ".outpost" / "chromadb"
 
 
 class RAGService:
     def __init__(self, cfg):
         self.cfg = cfg
-        self.client: Optional[object] = None
-        self._doc_meta: dict = {}  # doc_id -> {name, chunks, size}
+        self.client = None
+        self.collection = None
 
     async def init(self):
-        if not QDRANT_AVAILABLE:
-            print("[RAG] qdrant-client not installed, RAG disabled")
-            return
         try:
-            self.client = AsyncQdrantClient(
-                host=self.cfg.qdrant_host,
-                port=self.cfg.qdrant_port,
+            DB_PATH.mkdir(parents=True, exist_ok=True)
+            self.client = chromadb.PersistentClient(
+                path=str(DB_PATH),
+                settings=Settings(anonymized_telemetry=False)
             )
-            collections = await self.client.get_collections()
-            names = [c.name for c in collections.collections]
-            if COLLECTION not in names:
-                await self.client.create_collection(
-                    collection_name=COLLECTION,
-                    vectors_config=VectorParams(size=EMBED_DIM, distance=Distance.COSINE),
-                )
-            print(f"[RAG] Connected to Qdrant, collection '{COLLECTION}' ready")
+            self.collection = self.client.get_or_create_collection(
+                name=COLLECTION,
+                metadata={"hnsw:space": "cosine"}
+            )
+            print(f"[RAG] ChromaDB ready at {DB_PATH}, collection '{COLLECTION}'")
         except Exception as e:
-            print(f"[RAG] Qdrant not available: {e} - RAG disabled")
+            print(f"[RAG] ChromaDB failed: {e} - RAG disabled")
             self.client = None
+            self.collection = None
 
     # ── Embedding ─────────────────────────────────────────────────────────────
 
     async def _embed(self, texts: list[str]) -> list[list[float]]:
-        """Embed text using Ollama's embedding API"""
         vectors = []
         async with httpx.AsyncClient(timeout=60) as client:
             for text in texts:
@@ -80,7 +67,7 @@ class RAGService:
             except Exception as e:
                 return f"[PDF parse error: {e}]"
 
-        if ext in (".docx",):
+        if ext == ".docx":
             try:
                 import docx
                 doc = docx.Document(io.BytesIO(content))
@@ -88,7 +75,6 @@ class RAGService:
             except Exception as e:
                 return f"[DOCX parse error: {e}]"
 
-        # Plain text fallback (txt, md, csv, etc.)
         try:
             return content.decode("utf-8", errors="replace")
         except Exception:
@@ -105,7 +91,6 @@ class RAGService:
             )
             return splitter.split_text(text)
         except ImportError:
-            # Fallback manual chunking
             words = text.split()
             chunks, i = [], 0
             while i < len(words):
@@ -116,8 +101,8 @@ class RAGService:
     # ── Public API ────────────────────────────────────────────────────────────
 
     async def ingest(self, doc_id: str, filename: str, content: bytes) -> dict:
-        if not self.client:
-            return {"error": "Qdrant not available"}
+        if not self.collection:
+            return {"error": "RAG not available"}
 
         text = self._extract_text(filename, content)
         if not text.strip():
@@ -129,55 +114,71 @@ class RAGService:
 
         vectors = await self._embed(chunks)
 
-        points = [
-            PointStruct(
-                id=str(uuid.uuid4()),
-                vector=vec,
-                payload={"doc_id": doc_id, "filename": filename, "text": chunk, "chunk_idx": i}
-            )
-            for i, (chunk, vec) in enumerate(zip(chunks, vectors))
+        ids = [str(uuid.uuid4()) for _ in chunks]
+        metadatas = [
+            {"doc_id": doc_id, "filename": filename, "chunk_idx": i}
+            for i in range(len(chunks))
         ]
 
-        await self.client.upsert(collection_name=COLLECTION, points=points)
+        self.collection.upsert(
+            ids=ids,
+            embeddings=vectors,
+            documents=chunks,
+            metadatas=metadatas,
+        )
 
-        size_str = f"{len(content) / 1024:.1f} KB" if len(content) < 1e6 else f"{len(content) / 1e6:.1f} MB"
-        self._doc_meta[doc_id] = {"id": doc_id, "name": filename, "chunks": len(chunks), "size": size_str}
-        return {"doc_id": doc_id, "chunks": len(chunks), "status": "indexed"}
+        size_str = f"{len(content)/1024:.1f} KB" if len(content) < 1e6 else f"{len(content)/1e6:.1f} MB"
+        return {"doc_id": doc_id, "chunks": len(chunks), "size": size_str, "status": "indexed"}
 
     async def retrieve(self, query: str, top_k: int = 5) -> str:
-        if not self.client:
+        if not self.collection:
             return ""
         try:
             vectors = await self._embed([query])
-            results = await self.client.search(
-                collection_name=COLLECTION,
-                query_vector=vectors[0],
-                limit=top_k,
-                score_threshold=0.4,
+            results = self.collection.query(
+                query_embeddings=vectors,
+                n_results=top_k,
+                include=["documents", "distances"]
             )
-            if not results:
+            docs = results.get("documents", [[]])[0]
+            distances = results.get("distances", [[]])[0]
+
+            # Filter by similarity threshold (distance < 0.6 for cosine)
+            filtered = [doc for doc, dist in zip(docs, distances) if dist < 0.6]
+            if not filtered:
                 return ""
-            chunks = [r.payload.get("text", "") for r in results]
-            return "\n\n---\n\n".join(chunks)
+            return "\n\n---\n\n".join(filtered)
         except Exception as e:
             print(f"[RAG] Retrieve error: {e}")
             return ""
 
     async def list_documents(self) -> list[dict]:
-        if not self.client:
+        if not self.collection:
             return []
-        return list(self._doc_meta.values())
+        try:
+            results = self.collection.get(include=["metadatas"])
+            metadatas = results.get("metadatas", [])
 
-    async def delete(self, doc_id: str):
-        if not self.client:
+            # Aggregate by doc_id
+            docs = {}
+            for m in metadatas:
+                doc_id = m.get("doc_id")
+                if doc_id not in docs:
+                    docs[doc_id] = {
+                        "id": doc_id,
+                        "name": m.get("filename", "unknown"),
+                        "chunks": 0
+                    }
+                docs[doc_id]["chunks"] += 1
+            return list(docs.values())
+        except Exception as e:
+            print(f"[RAG] list_documents error: {e}")
+            return []
+
+    async def delete(self, doc_id: str) -> None:
+        if not self.collection:
             return
-        from qdrant_client.models import FilterSelector
-        await self.client.delete(
-            collection_name=COLLECTION,
-            points_selector=FilterSelector(
-                filter=Filter(
-                    must=[FieldCondition(key="doc_id", match=MatchValue(value=doc_id))]
-                )
-            )
-        )
-        self._doc_meta.pop(doc_id, None)
+        try:
+            self.collection.delete(where={"doc_id": doc_id})
+        except Exception as e:
+            print(f"[RAG] Delete error: {e}")
