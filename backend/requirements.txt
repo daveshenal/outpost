@@ -3,7 +3,7 @@ uvicorn[standard]
 httpx
 pydantic
 python-multipart
-qdrant-client
+chromadb
 typer
 rich
 pypdf
