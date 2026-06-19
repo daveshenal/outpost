@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from pydantic import BaseModel
 
-CONFIG_PATH = Path.home() / ".localai" / "config.json"
+CONFIG_PATH = Path.home() / ".Outpost" / "config.json"
 
 
 class Config(BaseModel):

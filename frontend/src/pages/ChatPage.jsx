@@ -93,12 +93,17 @@ export default function ChatPage() {
 
       {/* Header */}
       <div style={{
-        padding: '12px 20px',
+        padding: '16px 20px',
         borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>
-          {conv?.title || 'Chat'}
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+            {conv?.title || 'Chat'}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            Your local AI, no internet required
+          </div>
         </div>
         <button onClick={() => { createConversation() }} style={{
           display: 'flex', alignItems: 'center', gap: 6,
@@ -172,7 +177,7 @@ export default function ChatPage() {
             value={input}
             onChange={handleInput}
             onKeyDown={handleKey}
-            placeholder={activeModel ? 'Message… (Shift+Enter for newline)' : 'Select a model to start'}
+            placeholder={activeModel ? 'Write a message...' : 'Select a model to start'}
             disabled={!activeModel || streaming}
             rows={1}
             style={{

@@ -11,7 +11,7 @@ RED='\033[31m'
 RESET='\033[0m'
 
 echo ""
-echo -e "${BOLD}LocalAI Installer${RESET}"
+echo -e "${BOLD}Outpost Installer${RESET}"
 echo -e "${CYAN}─────────────────────────────────────${RESET}"
 echo ""
 
@@ -54,7 +54,7 @@ else
 fi
 
 # ── Qdrant ────────────────────────────────────────────────────────────────────
-QDRANT_DIR="$HOME/.localai/qdrant"
+QDRANT_DIR="$HOME/.Outpost/qdrant"
 if [ ! -f "$QDRANT_DIR/qdrant" ]; then
   echo ""
   echo -e "  Installing Qdrant…"
@@ -83,35 +83,35 @@ echo -e "  Building frontend…"
 npm run build
 
 # ── CLI shortcut ──────────────────────────────────────────────────────────────
-cat > /usr/local/bin/localai << SCRIPT
+cat > /usr/local/bin/Outpost << SCRIPT
 #!/usr/bin/env bash
 cd "$REPO_ROOT"
 python3 -m cli.cli "\$@"
 SCRIPT
-chmod +x /usr/local/bin/localai 2>/dev/null || true
+chmod +x /usr/local/bin/Outpost 2>/dev/null || true
 
 # ── Launch script ─────────────────────────────────────────────────────────────
-cat > "$HOME/.localai/start.sh" << LAUNCH
+cat > "$HOME/.Outpost/start.sh" << LAUNCH
 #!/usr/bin/env bash
 cd "$REPO_ROOT"
 # Start Ollama
 ollama serve &>/dev/null &
 
 # Start Qdrant
-~/.localai/qdrant/qdrant --storage-path ~/.localai/qdrant/storage &>/dev/null &
+~/.Outpost/qdrant/qdrant --storage-path ~/.Outpost/qdrant/storage &>/dev/null &
 
 # Start backend
 python3 -m uvicorn backend.server:app --host 127.0.0.1 --port 8765 &>/dev/null &
 
-echo "LocalAI services started"
+echo "Outpost services started"
 LAUNCH
-chmod +x "$HOME/.localai/start.sh"
+chmod +x "$HOME/.Outpost/start.sh"
 
 echo ""
 echo -e "${GREEN}${BOLD}✓ Installation complete!${RESET}"
 echo ""
 echo -e "  Frontend:           ${CYAN}$REPO_ROOT/frontend/dist${RESET}"
-echo -e "  Start services:     ${CYAN}~/.localai/start.sh${RESET}"
-echo -e "  Use the CLI:        ${CYAN}localai chat${RESET}"
-echo -e "  Pull a model first: ${CYAN}localai models pull llama3.1:8b${RESET}"
+echo -e "  Start services:     ${CYAN}~/.Outpost/start.sh${RESET}"
+echo -e "  Use the CLI:        ${CYAN}Outpost chat${RESET}"
+echo -e "  Pull a model first: ${CYAN}Outpost models pull llama3.1:8b${RESET}"
 echo ""

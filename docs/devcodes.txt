@@ -1,0 +1,23 @@
+Build command 
+pyinstaller outpost-backend.spec
+
+Test the exe directly
+.\dist\outpost-backend.exe
+
+If that works, copy it to Tauri binaries
+copy .\dist\outpost-backend.exe .\frontend\src-tauri\binaries\outpost-backend-x86_64-pc-windows-msvc.exe
+
+Then test the full system
+cd frontend
+npm run tauri dev
+
+If the sidecar exe is locked. Kill it first:
+taskkill /IM outpost-backend.exe /F
+
+# In a new terminal (no venv needed, use the exe directly)
+python cli/cli.py status
+python cli/cli.py models list
+python cli/cli.py chat
+python cli/cli.py docs list
+python cli/cli.py docs add data/documents/yourfile.csv
+python cli/cli.py docs delete <doc-id>

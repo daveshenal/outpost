@@ -121,7 +121,7 @@ export default function SettingsPage() {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ fontSize: 15, fontWeight: 600 }}>Settings</div>
+        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Settings</div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Configure your local AI stack</div>
       </div>
 

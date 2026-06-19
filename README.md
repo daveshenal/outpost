@@ -1,4 +1,4 @@
-# <img src="assests/icon.png" width="60" valign="middle"> Outpost - Offline AI Station
+# <img src="assets/icon-512.png" width="60" valign="middle"> Outpost - Offline AI Station
 
 ![Status](https://img.shields.io/badge/status-active--development-red)
 
@@ -29,22 +29,22 @@ chmod +x install.sh && ./install.sh
 
 ### First run
 ```bash
-~/.localai/start.sh          # start services
-localai models pull llama3.1:8b
-localai chat
+~/.Outpost/start.sh          # start services
+Outpost models pull llama3.1:8b
+Outpost chat
 ```
 
 ---
 
 ## CLI
 ```bash
-localai serve                          # start backend
-localai chat                           # interactive chat
-localai chat --model deepseek-coder-v2:16b
-localai models list / pull / delete
-localai docs add ./file.pdf
-localai docs list
-localai status
+Outpost serve                          # start backend
+Outpost chat                           # interactive chat
+Outpost chat --model deepseek-coder-v2:16b
+Outpost models list / pull / delete
+Outpost docs add ./file.pdf
+Outpost docs list
+Outpost status
 ```
 
 ---
@@ -76,7 +76,7 @@ from openai import OpenAI
 client = OpenAI(base_url="http://localhost:8765/v1", api_key="local")
 ```
 
-Config: `~/.localai/config.json`
+Config: `~/.Outpost/config.json`
 
 ## Project Structure
 

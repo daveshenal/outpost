@@ -1,5 +1,6 @@
 import { useStore } from '../store'
 import { MessageSquare, Package, FileText, Settings, Plus, Trash2, Cpu } from 'lucide-react'
+import outpostIcon from '../assets/icon-64.png'
 
 const NAV = [
   { id: 'chat',      icon: MessageSquare, label: 'Chat' },
@@ -30,22 +31,16 @@ export default function Sidebar() {
     }}>
       {/* Logo */}
       <div style={{
-        padding: '16px 16px 12px',
+        padding: '16px 20px',
         borderBottom: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
+        gap: 12,
       }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 8,
-          background: 'var(--accent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Cpu size={15} color="white" />
-        </div>
+        <img src={outpostIcon} width={38} height={38} />
         <div>
-          <div style={{ fontWeight: 600, fontSize: 13, letterSpacing: '-0.2px' }}>LocalAI</div>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ fontWeight: 600, fontSize: 15, letterSpacing: '-0.2px', marginBottom: 2 }}>OUTPOST</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{
               width: 5, height: 5, borderRadius: '50%',
               background: backendReady ? 'var(--green)' : 'var(--amber)',
@@ -57,11 +52,11 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav style={{ padding: '8px 8px 0' }}>
+      <nav style={{ padding: '8px' }}>
         {NAV.map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => setPage(id)} style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+            padding: '8px 10px', margin: '4px 0', borderRadius: 'var(--radius-sm)',
             color: page === id ? 'var(--text-primary)' : 'var(--text-secondary)',
             background: page === id ? 'var(--bg-hover)' : 'transparent',
             fontSize: 13, fontWeight: page === id ? 500 : 400,
@@ -78,13 +73,15 @@ export default function Sidebar() {
 
       {/* Conversations (only show on chat page) */}
       {page === 'chat' && (
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', marginTop: 12 }}>
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
           <div style={{
-            padding: '0 8px 6px',
+            marginTop: '12px',
+            borderTop: '1px solid var(--border)',
+            padding: '8px 10px 8px 12px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              Chats
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px'}}>
+              Recent chats
             </span>
             <button onClick={() => { createConversation(); setPage('chat') }} style={{
               width: 22, height: 22, borderRadius: 5,
@@ -96,7 +93,7 @@ export default function Sidebar() {
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 8px' }}>
             {conversations.length === 0 ? (
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 2px' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 4px'}}>
                 No chats yet
               </div>
             ) : conversations.map(conv => (
@@ -104,7 +101,7 @@ export default function Sidebar() {
                 onClick={() => setActiveConv(conv.id)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '7px 8px', borderRadius: 'var(--radius-sm)', marginBottom: 1, cursor: 'pointer',
+                  padding: '7px 8px', borderRadius: 'var(--radius-sm)', marginBottom: 4, cursor: 'pointer',
                   background: activeConvId === conv.id ? 'var(--bg-hover)' : 'transparent',
                   group: true,
                 }}
@@ -138,12 +135,13 @@ export default function Sidebar() {
       {/* Active model footer */}
       <div style={{
         padding: '10px 12px',
+        marginTop: '12px',
         borderTop: '1px solid var(--border)',
-        fontSize: 11,
+        fontSize: 12,
         color: 'var(--text-muted)',
         display: 'flex', alignItems: 'center', gap: 6,
       }}>
-        <Cpu size={11} />
+        <Cpu size={12} />
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {activeModel || 'No model selected'}
         </span>
