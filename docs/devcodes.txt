@@ -7,7 +7,7 @@ Test the exe directly
 .\dist\outpost-backend.exe
 
 If that works, copy it to Tauri binaries
-copy .\dist\outpost-backend.exe .\frontend\src-tauri\binaries\outpost-backend-x86_64-pc-windows-msvc.exe
+Copy-Item dist\outpost-backend.exe frontend\src-tauri\binaries\outpost-backend-x86_64-pc-windows-msvc.exe -Force
 
 Then test the full system
 cd frontend
