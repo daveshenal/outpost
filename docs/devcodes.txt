@@ -1,3 +1,5 @@
+.venv-build\Scripts\activate
+
 Build command 
 pyinstaller outpost-backend.spec
 
