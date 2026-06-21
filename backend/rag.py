@@ -168,7 +168,7 @@ class RAGService:
                         "id": doc_id,
                         "name": m.get("filename", "unknown"),
                         "chunks": 0,
-                        "size": m.get("size", "—")   # ← add this
+                        "size": m.get("size", "-")
                     }
                 docs[doc_id]["chunks"] += 1
             return list(docs.values())
