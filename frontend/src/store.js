@@ -2,8 +2,6 @@ import { create } from 'zustand'
 
 const API = 'http://localhost:8765'
 
-const isEmbeddingModel = (name) => typeof name === 'string' && name.toLowerCase().includes('embed')
-
 function uid() {
   return crypto.randomUUID()
 }
@@ -45,15 +43,8 @@ export const useStore = create((set, get) => ({
       const models = data.models || []
       set({ models })
       const { activeModel } = get()
-      const firstChatModel = models.find(m => !isEmbeddingModel(m.name))
-      if (activeModel && isEmbeddingModel(activeModel) && firstChatModel) {
-        get().setActiveModel(firstChatModel.name)
-      } else if (!activeModel) {
-        if (firstChatModel) {
-          get().setActiveModel(firstChatModel.name)
-        } else if (models.length) {
-          get().setActiveModel(models[0].name)
-        }
+      if (!activeModel && models.length) {
+        get().setActiveModel(models[0].name)
       }
     } catch {}
   },

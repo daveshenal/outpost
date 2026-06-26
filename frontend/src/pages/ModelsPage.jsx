@@ -11,8 +11,6 @@ const FEATURED = [
   { name: 'nomic-embed-text',   label: 'Nomic Embed',         size: '0.3 GB', vram: '~1 GB', tag: 'Embeddings', desc: 'Required for document Q&A (RAG)' },
 ]
 
-const isEmbeddingModel = (name) => typeof name === 'string' && name.toLowerCase().includes('embed')
-
 const TAG_COLORS = {
   Fast:         { bg: 'var(--green-dim)',   color: 'var(--green)' },
   Balanced:     { bg: 'var(--accent-dim)',  color: 'var(--accent)' },
@@ -51,8 +49,6 @@ export default function ModelsPage() {
   useEffect(() => { fetchModels() }, [])
 
   const isInstalled = (name) => models.some(m => m.name === name || m.name.startsWith(name.split(':')[0]))
-  const chatModels = models.filter(m => !isEmbeddingModel(m.name))
-  const embeddingModels = models.filter(m => isEmbeddingModel(m.name))
 
   const handlePull = async (name) => {
     setPulling(p => ({ ...p, [name]: { status: 'Starting…' } }))
@@ -78,13 +74,13 @@ export default function ModelsPage() {
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
 
         {/* Installed */}
-        {chatModels.length > 0 && (
+        {models.length > 0 && (
           <section style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-              Installed chat models ({chatModels.length})
+              Installed ({models.length})
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {chatModels.map(m => (
+              {models.map(m => (
                 <div key={m.name} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '10px 14px', borderRadius: 'var(--radius-md)',
@@ -110,41 +106,6 @@ export default function ModelsPage() {
                     onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
                   >
                     <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {embeddingModels.length > 0 && (
-          <section style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-              Embedding models ({embeddingModels.length})
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {embeddingModels.map(m => (
-                <div key={m.name} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                  background: 'var(--bg-elevated)',
-                  border: '1px solid var(--border)',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <CheckCircle size={14} color='var(--text-muted)' />
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>{m.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {m.size ? `${(m.size / 1e9).toFixed(1)} GB` : ''}
-                        {' · embedding model'}
-                      </div>
-                    </div>
-                  </div>
-                  <button style={{
-                    padding: 6, borderRadius: 6, border: '1px solid var(--border)',
-                    color: 'var(--text-muted)', background: 'transparent', cursor: 'default',
-                  }}>
-                    Embedding only
                   </button>
                 </div>
               ))}
@@ -185,17 +146,16 @@ export default function ModelsPage() {
                   {inProgress ? (
                     <PullProgress progress={inProgress} />
                   ) : (
-                    <button onClick={() => installed ? (isEmbeddingModel(m.name) ? null : setActiveModel(m.name)) : handlePull(m.name)} style={{
+                    <button onClick={() => installed ? setActiveModel(m.name) : handlePull(m.name)} style={{
                       marginTop: 4, padding: '6px 10px', borderRadius: 6,
-                      background: installed ? (isEmbeddingModel(m.name) ? 'var(--bg-hover)' : 'var(--green-dim)') : 'var(--accent)',
-                      border: installed ? (isEmbeddingModel(m.name) ? '1px solid var(--border)' : '1px solid var(--green)40') : 'none',
-                      color: installed ? (isEmbeddingModel(m.name) ? 'var(--text-muted)' : 'var(--green)') : 'white',
+                      background: installed ? 'var(--green-dim)' : 'var(--accent)',
+                      border: installed ? '1px solid var(--green)40' : 'none',
+                      color: installed ? 'var(--green)' : 'white',
                       fontSize: 12, fontWeight: 500,
                       display: 'flex', alignItems: 'center', gap: 6,
                       justifyContent: 'center',
-                      cursor: installed && isEmbeddingModel(m.name) ? 'default' : 'pointer',
                     }}>
-                      {installed ? (isEmbeddingModel(m.name) ? 'Embedding model' : <><CheckCircle size={12} /> Use this model</>) : <><Download size={12} /> Download</>}
+                      {installed ? <><CheckCircle size={12} /> Use this model</> : <><Download size={12} /> Download</>}
                     </button>
                   )}
                 </div>
