@@ -42,9 +42,18 @@ export const useStore = create((set, get) => ({
       const data = await r.json()
       const models = data.models || []
       set({ models })
+  
+      const isEmbedModel = (name) => name.toLowerCase().includes('embed')
+  
+      const chatModels = models.filter(m => !isEmbedModel(m.name))
       const { activeModel } = get()
-      if (!activeModel && models.length) {
-        get().setActiveModel(models[0].name)
+  
+      if (!activeModel && chatModels.length) {
+        // No model selected yet — pick first chat model
+        get().setActiveModel(chatModels[0].name)
+      } else if (activeModel && isEmbedModel(activeModel) && chatModels.length) {
+        // Current active is an embed model — swap to first chat model
+        get().setActiveModel(chatModels[0].name)
       }
     } catch {}
   },
