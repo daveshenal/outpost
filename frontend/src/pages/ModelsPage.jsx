@@ -20,6 +20,8 @@ const TAG_COLORS = {
   Embeddings:   { bg: '#ec489915',          color: '#ec4899' },
 }
 
+const isEmbedModel = (name) => name.toLowerCase().includes('embed')
+
 function PullProgress({ progress }) {
   const pct = progress?.total ? Math.round((progress.completed / progress.total) * 100) : 0
   return (
@@ -31,6 +33,50 @@ function PullProgress({ progress }) {
       <div style={{ height: 3, background: 'var(--bg-hover)', borderRadius: 2 }}>
         <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent)', borderRadius: 2, transition: 'width 0.2s' }} />
       </div>
+    </div>
+  )
+}
+
+function InstalledModelRow({ m, activeModel, setActiveModel, deleteModel, isEmbed }) {
+  return (
+    <div key={m.name} style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '10px 14px', borderRadius: 'var(--radius-md)',
+      background: activeModel === m.name ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+      border: `1px solid ${activeModel === m.name ? 'var(--accent)40' : 'var(--border)'}`,
+      cursor: isEmbed ? 'default' : 'pointer',
+      transition: 'all 0.12s',
+    }} onClick={() => !isEmbed && setActiveModel(m.name)}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <CheckCircle size={14} color={activeModel === m.name ? 'var(--accent)' : isEmbed ? '#ec4899' : 'var(--green)'} />
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 500 }}>{m.name}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            {m.size ? `${(m.size / 1e9).toFixed(1)} GB` : ''}
+            {isEmbed ? ' · embedding only' : activeModel === m.name ? ' · active' : ''}
+          </div>
+        </div>
+      </div>
+      <button onClick={e => { e.stopPropagation(); deleteModel(m.name) }} style={{
+        padding: 6, borderRadius: 6,
+        color: 'var(--text-muted)', transition: 'color 0.1s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
+        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+      >
+        <Trash2 size={13} />
+      </button>
+    </div>
+  )
+}
+
+function SectionLabel({ text }) {
+  return (
+    <div style={{
+      fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
+      textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10,
+    }}>
+      {text}
     </div>
   )
 }
@@ -47,6 +93,9 @@ export default function ModelsPage() {
   const [customModel, setCustomModel] = useState('')
 
   useEffect(() => { fetchModels() }, [])
+
+  const chatModels = models.filter(m => !isEmbedModel(m.name))
+  const embedModels = models.filter(m => isEmbedModel(m.name))
 
   const isInstalled = (name) => models.some(m => m.name === name || m.name.startsWith(name.split(':')[0]))
 
@@ -73,41 +122,37 @@ export default function ModelsPage() {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
 
-        {/* Installed */}
-        {models.length > 0 && (
-          <section style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-              Installed ({models.length})
-            </div>
+        {/* Installed — Chat Models */}
+        {chatModels.length > 0 && (
+          <section style={{ marginBottom: 20 }}>
+            <SectionLabel text={`Chat Models (${chatModels.length})`} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {models.map(m => (
-                <div key={m.name} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                  background: activeModel === m.name ? 'var(--accent-dim)' : 'var(--bg-elevated)',
-                  border: `1px solid ${activeModel === m.name ? 'var(--accent)40' : 'var(--border)'}`,
-                  cursor: 'pointer', transition: 'all 0.12s',
-                }} onClick={() => setActiveModel(m.name)}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <CheckCircle size={14} color={activeModel === m.name ? 'var(--accent)' : 'var(--green)'} />
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>{m.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {m.size ? `${(m.size / 1e9).toFixed(1)} GB` : ''}
-                        {activeModel === m.name && ' · active'}
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={e => { e.stopPropagation(); deleteModel(m.name) }} style={{
-                    padding: 6, borderRadius: 6,
-                    color: 'var(--text-muted)', transition: 'color 0.1s',
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+              {chatModels.map(m => (
+                <InstalledModelRow
+                  key={m.name} m={m}
+                  activeModel={activeModel}
+                  setActiveModel={setActiveModel}
+                  deleteModel={deleteModel}
+                  isEmbed={false}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Installed — Embedding Models */}
+        {embedModels.length > 0 && (
+          <section style={{ marginBottom: 28 }}>
+            <SectionLabel text={`Embedding Models (${embedModels.length})`} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {embedModels.map(m => (
+                <InstalledModelRow
+                  key={m.name} m={m}
+                  activeModel={activeModel}
+                  setActiveModel={setActiveModel}
+                  deleteModel={deleteModel}
+                  isEmbed={true}
+                />
               ))}
             </div>
           </section>
@@ -115,14 +160,13 @@ export default function ModelsPage() {
 
         {/* Featured */}
         <section style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-            Available to download
-          </div>
+          <SectionLabel text="Available to download" />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {FEATURED.map(m => {
               const installed = isInstalled(m.name)
               const inProgress = pulling[m.name]
               const tc = TAG_COLORS[m.tag] || TAG_COLORS.Classic
+              const isEmbed = isEmbedModel(m.name)
               return (
                 <div key={m.name} style={{
                   padding: '14px', borderRadius: 'var(--radius-md)',
@@ -146,16 +190,25 @@ export default function ModelsPage() {
                   {inProgress ? (
                     <PullProgress progress={inProgress} />
                   ) : (
-                    <button onClick={() => installed ? setActiveModel(m.name) : handlePull(m.name)} style={{
-                      marginTop: 4, padding: '6px 10px', borderRadius: 6,
-                      background: installed ? 'var(--green-dim)' : 'var(--accent)',
-                      border: installed ? '1px solid var(--green)40' : 'none',
-                      color: installed ? 'var(--green)' : 'white',
-                      fontSize: 12, fontWeight: 500,
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      justifyContent: 'center',
-                    }}>
-                      {installed ? <><CheckCircle size={12} /> Use this model</> : <><Download size={12} /> Download</>}
+                    <button
+                      onClick={() => {
+                        if (installed && !isEmbed) setActiveModel(m.name)
+                        else if (!installed) handlePull(m.name)
+                      }}
+                      style={{
+                        marginTop: 4, padding: '6px 10px', borderRadius: 6,
+                        background: installed ? 'var(--green-dim)' : 'var(--accent)',
+                        border: installed ? '1px solid var(--green)40' : 'none',
+                        color: installed ? 'var(--green)' : 'white',
+                        fontSize: 12, fontWeight: 500,
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        justifyContent: 'center',
+                        cursor: installed && isEmbed ? 'default' : 'pointer',
+                      }}>
+                      {installed
+                        ? <><CheckCircle size={12} /> {isEmbed ? 'Installed' : 'Use this model'}</>
+                        : <><Download size={12} /> Download</>
+                      }
                     </button>
                   )}
                 </div>
@@ -166,9 +219,7 @@ export default function ModelsPage() {
 
         {/* Custom */}
         <section>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-            Custom model
-          </div>
+          <SectionLabel text="Custom model" />
           <div style={{
             display: 'flex', gap: 8,
             background: 'var(--bg-elevated)', border: '1px solid var(--border)',
