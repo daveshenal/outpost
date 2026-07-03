@@ -224,6 +224,7 @@ export default function ModelsPage() {
                   ) : (
                     <button
                       onClick={() => {
+                        if (!ollamaRunning) return
                         if (installed && !isEmbed) setActiveModel(m.name)
                         else if (!installed) handlePull(m.name)
                       }}
