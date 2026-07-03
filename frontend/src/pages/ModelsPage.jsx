@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { Download, Trash2, CheckCircle} from 'lucide-react'
 
-const ollamaRunning = useStore(s => s.ollamaRunning)
-
 const FEATURED = [
   { name: 'llama3.2:3b',        label: 'Llama 3.2 3B',        size: '2.0 GB', vram: '~3 GB', tag: 'Fast',        desc: 'Great for quick tasks, low VRAM' },
   { name: 'llama3.1:8b',        label: 'Llama 3.1 8B',        size: '4.7 GB', vram: '~6 GB', tag: 'Balanced',    desc: 'Best balance of speed and quality' },
@@ -90,6 +88,7 @@ export default function ModelsPage() {
   const deleteModel = useStore(s => s.deleteModel)
   const setActiveModel = useStore(s => s.setActiveModel)
   const activeModel = useStore(s => s.activeModel)
+  const ollamaRunning = useStore(s => s.ollamaRunning)
 
   const [pulling, setPulling] = useState({}) // name -> progress
   const [customModel, setCustomModel] = useState('')
