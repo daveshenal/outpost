@@ -27,6 +27,7 @@ export const useStore = create((set, get) => ({
   conversations: loadConversations(),
   activeConvId: null,
   streaming: false,
+  ollamaRunning: true,  // optimistic default
 
   setPage: (page) => set({ page }),
   setBackendReady: (ready) => set({ backendReady: ready }),
@@ -41,21 +42,22 @@ export const useStore = create((set, get) => ({
       const r = await fetch(`${API}/models`)
       const data = await r.json()
       const models = data.models || []
-      set({ models })
-  
+      const ollamaRunning = data.ollama_running !== false  // false only if explicitly false
+
+      set({ models, ollamaRunning })
+
       const isEmbedModel = (name) => name.toLowerCase().includes('embed')
-  
       const chatModels = models.filter(m => !isEmbedModel(m.name))
       const { activeModel } = get()
-  
+
       if (!activeModel && chatModels.length) {
-        // No model selected yet — pick first chat model
         get().setActiveModel(chatModels[0].name)
       } else if (activeModel && isEmbedModel(activeModel) && chatModels.length) {
-        // Current active is an embed model — swap to first chat model
         get().setActiveModel(chatModels[0].name)
       }
-    } catch {}
+    } catch {
+      set({ ollamaRunning: false })
+    }
   },
 
   fetchDocuments: async () => {
