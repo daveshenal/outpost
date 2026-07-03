@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useStore } from '../store'
 import { Download, Trash2, CheckCircle} from 'lucide-react'
 
+const ollamaRunning = useStore(s => s.ollamaRunning)
+
 const FEATURED = [
   { name: 'llama3.2:3b',        label: 'Llama 3.2 3B',        size: '2.0 GB', vram: '~3 GB', tag: 'Fast',        desc: 'Great for quick tasks, low VRAM' },
   { name: 'llama3.1:8b',        label: 'Llama 3.1 8B',        size: '4.7 GB', vram: '~6 GB', tag: 'Balanced',    desc: 'Best balance of speed and quality' },
@@ -119,6 +121,36 @@ export default function ModelsPage() {
           Download and manage local LLMs · RTX 3070 (8 GB VRAM) detected
         </div>
       </div>
+
+      {!ollamaRunning && (
+        <div style={{
+          margin: '12px 20px 0',
+          padding: '12px 14px',
+          borderRadius: 'var(--radius-md)',
+          background: 'var(--red-dim)',
+          border: '1px solid var(--red)40',
+          display: 'flex', alignItems: 'flex-start', gap: 10,
+        }}>
+          <div style={{ fontSize: 18, lineHeight: 1 }}>⚠️</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)', marginBottom: 3 }}>
+              Ollama is not running
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              Start Ollama and it will be detected automatically. Model downloads and chat will be disabled until then.
+            </div>
+            <button
+              onClick={() => get().fetchModels()}
+              style={{
+                marginTop: 8, padding: '4px 10px', borderRadius: 6,
+                background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+                color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer',
+              }}>
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
 
