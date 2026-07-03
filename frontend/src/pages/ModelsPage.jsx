@@ -3,21 +3,21 @@ import { useStore } from '../store'
 import { Download, Trash2, CheckCircle} from 'lucide-react'
 
 const FEATURED = [
-  { name: 'llama3.2:3b',        label: 'Llama 3.2 3B',        size: '2.0 GB', vram: '~3 GB', tag: 'Fast',        desc: 'Great for quick tasks, low VRAM' },
-  { name: 'llama3.1:8b',        label: 'Llama 3.1 8B',        size: '4.7 GB', vram: '~6 GB', tag: 'Balanced',    desc: 'Best balance of speed and quality' },
-  { name: 'deepseek-coder-v2:16b', label: 'DeepSeek Coder 16B', size: '9.1 GB', vram: '~10 GB', tag: 'Coding',  desc: 'Specialized for code generation' },
-  { name: 'qwen2.5:7b',         label: 'Qwen 2.5 7B',         size: '4.4 GB', vram: '~6 GB', tag: 'Multilingual', desc: 'Excellent multilingual support' },
-  { name: 'mistral:7b',         label: 'Mistral 7B',          size: '4.1 GB', vram: '~6 GB', tag: 'Classic',    desc: 'Reliable, widely tested' },
-  { name: 'nomic-embed-text',   label: 'Nomic Embed',         size: '0.3 GB', vram: '~1 GB', tag: 'Embeddings', desc: 'Required for document Q&A (RAG)' },
+  { name: 'llama3.2:3b', label: 'Llama 3.2 3B', size: '2.0 GB', vram: '~3 GB', tag: 'Fast', desc: 'Great for quick tasks, low VRAM' },
+  { name: 'llama3.1:8b', label: 'Llama 3.1 8B', size: '4.7 GB', vram: '~6 GB', tag: 'Balanced', desc: 'Best balance of speed and quality' },
+  { name: 'deepseek-coder-v2:16b', label: 'DeepSeek Coder 16B', size: '9.1 GB', vram: '~10 GB', tag: 'Coding', desc: 'Specialized for code generation' },
+  { name: 'qwen2.5:7b', label: 'Qwen 2.5 7B', size: '4.4 GB', vram: '~6 GB', tag: 'Multilingual', desc: 'Excellent multilingual support' },
+  { name: 'mistral:7b', label: 'Mistral 7B', size: '4.1 GB', vram: '~6 GB', tag: 'Classic', desc: 'Reliable, widely tested' },
+  { name: 'nomic-embed-text', label: 'Nomic Embed', size: '0.3 GB', vram: '~1 GB', tag: 'Embeddings', desc: 'Required for document Q&A (RAG)' },
 ]
 
 const TAG_COLORS = {
-  Fast:         { bg: 'var(--green-dim)',   color: 'var(--green)' },
-  Balanced:     { bg: 'var(--accent-dim)',  color: 'var(--accent)' },
-  Coding:       { bg: '#f59e0b15',          color: 'var(--amber)' },
-  Multilingual: { bg: '#06b6d415',          color: '#06b6d4' },
-  Classic:      { bg: 'var(--bg-hover)',    color: 'var(--text-secondary)' },
-  Embeddings:   { bg: '#ec489915',          color: '#ec4899' },
+  Fast:         { bg: 'var(--green-dim)', color: 'var(--green)' },
+  Balanced:     { bg: 'var(--accent-dim)', color: 'var(--accent)' },
+  Coding:       { bg: '#f59e0b15', color: 'var(--amber)' },
+  Multilingual: { bg: '#06b6d415', color: '#06b6d4' },
+  Classic:      { bg: 'var(--bg-hover)', color: 'var(--text-secondary)' },
+  Embeddings:   { bg: '#ec489915', color: '#ec4899' },
 }
 
 const isEmbedModel = (name) => name.toLowerCase().includes('embed')
@@ -139,7 +139,7 @@ export default function ModelsPage() {
               Start Ollama and it will be detected automatically. Model downloads and chat will be disabled until then.
             </div>
             <button
-              onClick={() => get().fetchModels()}
+              onClick={fetchModels}
               style={{
                 marginTop: 8, padding: '4px 10px', borderRadius: 6,
                 background: 'var(--bg-elevated)', border: '1px solid var(--border)',
