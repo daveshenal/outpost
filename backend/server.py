@@ -68,6 +68,11 @@ async def _check_ollama() -> bool:
     except Exception:
         return False
 
+@app.get("/ollama/status")
+async def ollama_status():
+    running = await _check_ollama()
+    return {"running": running, "url": cfg.ollama_url}
+
 @app.get("/models")
 async def list_models():
     async with httpx.AsyncClient() as client:
