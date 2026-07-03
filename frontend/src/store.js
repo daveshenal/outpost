@@ -69,6 +69,11 @@ export const useStore = create((set, get) => ({
   },
 
   pullModel: async (name, onProgress) => {
+    const { ollamaRunning } = get()
+    if (!ollamaRunning) {
+      onProgress?.({ error: 'Ollama is not running' })
+      return
+    }
     const r = await fetch(`${API}/models/pull`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
