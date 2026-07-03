@@ -60,6 +60,14 @@ async def update_config(body: dict):
 
 # ── Models ────────────────────────────────────────────────────────────────────
 
+async def _check_ollama() -> bool:
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(f"{cfg.ollama_url}/api/tags", timeout=3)
+            return r.status_code == 200
+    except Exception:
+        return False
+
 @app.get("/models")
 async def list_models():
     async with httpx.AsyncClient() as client:
