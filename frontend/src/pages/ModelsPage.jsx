@@ -236,7 +236,8 @@ export default function ModelsPage() {
                         fontSize: 12, fontWeight: 500,
                         display: 'flex', alignItems: 'center', gap: 6,
                         justifyContent: 'center',
-                        cursor: installed && isEmbed ? 'default' : 'pointer',
+                        opacity: !ollamaRunning && !installed ? 0.4 : 1,
+                        cursor: (!ollamaRunning && !installed) || (installed && isEmbed) ? 'not-allowed' : 'pointer',
                       }}>
                       {installed
                         ? <><CheckCircle size={12} /> {isEmbed ? 'Installed' : 'Use this model'}</>
