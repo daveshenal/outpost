@@ -36,14 +36,14 @@ async def startup():
     await rag.init()
 
 
-# Health
+# ── Health ────────────────────────────────────────────────────────────────────
 
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "0.1.0"}
 
 
-# Config
+# ── Config ────────────────────────────────────────────────────────────────────
 
 @app.get("/config")
 async def get_config():
@@ -58,22 +58,7 @@ async def update_config(body: dict):
     return {"status": "saved"}
 
 
-# Models
-
-async def _check_ollama() -> bool:
-    try:
-        async with httpx.AsyncClient() as client:
-            r = await client.get(f"{cfg.ollama_url}/api/tags", timeout=3)
-            return r.status_code == 200
-    except Exception:
-        return False
-
-
-@app.get("/ollama/status")
-async def ollama_status():
-    running = await _check_ollama()
-    return {"running": running, "url": cfg.ollama_url}
-
+# ── Models ────────────────────────────────────────────────────────────────────
 
 @app.get("/models")
 async def list_models():
@@ -85,9 +70,9 @@ async def list_models():
                 {"name": m["name"], "size": m.get("size", 0), "modified": m.get("modified_at", "")}
                 for m in data.get("models", [])
             ]
-            return {"models": models, "ollama_running": True}
+            return {"models": models}
         except Exception as e:
-            return {"models": [], "ollama_running": False, "error": str(e)}
+            return {"models": [], "error": str(e)}
 
 
 @app.post("/models/pull")
@@ -114,7 +99,7 @@ async def delete_model(name: str):
         return {"status": "deleted" if r.status_code == 200 else "error"}
 
 
-# Chat (OpenAI-compatible)
+# ── Chat (OpenAI-compatible) ──────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):
     model: str
@@ -194,7 +179,7 @@ async def chat(req: ChatRequest):
             }
 
 
-# Documents / RAG
+# ── Documents / RAG ───────────────────────────────────────────────────────────
 
 @app.get("/documents")
 async def list_documents():
@@ -222,7 +207,7 @@ async def delete_document(doc_id: str):
     return {"status": "deleted"}
 
 
-# OpenAI compatible endpoint (for 3rd party tool support)
+# ── OpenAI-compatible endpoint (for 3rd-party tool support) ──────────────────
 
 @app.post("/v1/chat/completions")
 async def openai_chat(req: dict):

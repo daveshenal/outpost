@@ -3,21 +3,21 @@ import { useStore } from '../store'
 import { Download, Trash2, CheckCircle} from 'lucide-react'
 
 const FEATURED = [
-  { name: 'llama3.2:3b', label: 'Llama 3.2 3B', size: '2.0 GB', vram: '~3 GB', tag: 'Fast', desc: 'Great for quick tasks, low VRAM' },
-  { name: 'llama3.1:8b', label: 'Llama 3.1 8B', size: '4.7 GB', vram: '~6 GB', tag: 'Balanced', desc: 'Best balance of speed and quality' },
-  { name: 'deepseek-coder-v2:16b', label: 'DeepSeek Coder 16B', size: '9.1 GB', vram: '~10 GB', tag: 'Coding', desc: 'Specialized for code generation' },
-  { name: 'qwen2.5:7b', label: 'Qwen 2.5 7B', size: '4.4 GB', vram: '~6 GB', tag: 'Multilingual', desc: 'Excellent multilingual support' },
-  { name: 'mistral:7b', label: 'Mistral 7B', size: '4.1 GB', vram: '~6 GB', tag: 'Classic', desc: 'Reliable, widely tested' },
-  { name: 'nomic-embed-text', label: 'Nomic Embed', size: '0.3 GB', vram: '~1 GB', tag: 'Embeddings', desc: 'Required for document Q&A (RAG)' },
+  { name: 'llama3.2:3b',        label: 'Llama 3.2 3B',        size: '2.0 GB', vram: '~3 GB', tag: 'Fast',        desc: 'Great for quick tasks, low VRAM' },
+  { name: 'llama3.1:8b',        label: 'Llama 3.1 8B',        size: '4.7 GB', vram: '~6 GB', tag: 'Balanced',    desc: 'Best balance of speed and quality' },
+  { name: 'deepseek-coder-v2:16b', label: 'DeepSeek Coder 16B', size: '9.1 GB', vram: '~10 GB', tag: 'Coding',  desc: 'Specialized for code generation' },
+  { name: 'qwen2.5:7b',         label: 'Qwen 2.5 7B',         size: '4.4 GB', vram: '~6 GB', tag: 'Multilingual', desc: 'Excellent multilingual support' },
+  { name: 'mistral:7b',         label: 'Mistral 7B',          size: '4.1 GB', vram: '~6 GB', tag: 'Classic',    desc: 'Reliable, widely tested' },
+  { name: 'nomic-embed-text',   label: 'Nomic Embed',         size: '0.3 GB', vram: '~1 GB', tag: 'Embeddings', desc: 'Required for document Q&A (RAG)' },
 ]
 
 const TAG_COLORS = {
-  Fast:         { bg: 'var(--green-dim)', color: 'var(--green)' },
-  Balanced:     { bg: 'var(--accent-dim)', color: 'var(--accent)' },
-  Coding:       { bg: '#f59e0b15', color: 'var(--amber)' },
-  Multilingual: { bg: '#06b6d415', color: '#06b6d4' },
-  Classic:      { bg: 'var(--bg-hover)', color: 'var(--text-secondary)' },
-  Embeddings:   { bg: '#ec489915', color: '#ec4899' },
+  Fast:         { bg: 'var(--green-dim)',   color: 'var(--green)' },
+  Balanced:     { bg: 'var(--accent-dim)',  color: 'var(--accent)' },
+  Coding:       { bg: '#f59e0b15',          color: 'var(--amber)' },
+  Multilingual: { bg: '#06b6d415',          color: '#06b6d4' },
+  Classic:      { bg: 'var(--bg-hover)',    color: 'var(--text-secondary)' },
+  Embeddings:   { bg: '#ec489915',          color: '#ec4899' },
 }
 
 const isEmbedModel = (name) => name.toLowerCase().includes('embed')
@@ -88,7 +88,6 @@ export default function ModelsPage() {
   const deleteModel = useStore(s => s.deleteModel)
   const setActiveModel = useStore(s => s.setActiveModel)
   const activeModel = useStore(s => s.activeModel)
-  const ollamaRunning = useStore(s => s.ollamaRunning)
 
   const [pulling, setPulling] = useState({}) // name -> progress
   const [customModel, setCustomModel] = useState('')
@@ -120,36 +119,6 @@ export default function ModelsPage() {
           Download and manage local LLMs · RTX 3070 (8 GB VRAM) detected
         </div>
       </div>
-
-      {!ollamaRunning && (
-        <div style={{
-          margin: '12px 20px 0',
-          padding: '12px 14px',
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--red-dim)',
-          border: '1px solid var(--red)40',
-          display: 'flex', alignItems: 'flex-start', gap: 10,
-        }}>
-          <div style={{ fontSize: 18, lineHeight: 1 }}>⚠️</div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)', marginBottom: 3 }}>
-              Ollama is not running
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              Start Ollama and it will be detected automatically. Model downloads and chat will be disabled until then.
-            </div>
-            <button
-              onClick={fetchModels}
-              style={{
-                marginTop: 8, padding: '4px 10px', borderRadius: 6,
-                background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-                color: 'var(--text-secondary)', fontSize: 12, cursor: 'pointer',
-              }}>
-              Retry
-            </button>
-          </div>
-        </div>
-      )}
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
 
@@ -223,7 +192,6 @@ export default function ModelsPage() {
                   ) : (
                     <button
                       onClick={() => {
-                        if (!ollamaRunning) return
                         if (installed && !isEmbed) setActiveModel(m.name)
                         else if (!installed) handlePull(m.name)
                       }}
@@ -235,8 +203,7 @@ export default function ModelsPage() {
                         fontSize: 12, fontWeight: 500,
                         display: 'flex', alignItems: 'center', gap: 6,
                         justifyContent: 'center',
-                        opacity: !ollamaRunning && !installed ? 0.4 : 1,
-                        cursor: (!ollamaRunning && !installed) || (installed && isEmbed) ? 'not-allowed' : 'pointer',
+                        cursor: installed && isEmbed ? 'default' : 'pointer',
                       }}>
                       {installed
                         ? <><CheckCircle size={12} /> {isEmbed ? 'Installed' : 'Use this model'}</>
