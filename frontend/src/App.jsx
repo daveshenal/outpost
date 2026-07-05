@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useStore } from './store'
 import Sidebar from './components/Sidebar'
+import OllamaBanner from './components/OllamaBanner'
 import ChatPage from './pages/ChatPage'
 import ModelsPage from './pages/ModelsPage'
 import DocumentsPage from './pages/DocumentsPage'
@@ -19,32 +20,33 @@ const API = 'http://localhost:8765'
 export default function App() {
   const page = useStore(s => s.page)
   const setBackendReady = useStore(s => s.setBackendReady)
-  const fetchModels = useStore(s => s.fetchModels)
-  const fetchDocuments = useStore(s => s.fetchDocuments)
+  const checkOllama = useStore(s => s.checkOllama)
   const backendReady = useStore(s => s.backendReady)
+  const ollamaStatus = useStore(s => s.ollamaStatus)
 
+  // Wait for the Tauri sidecar backend to be ready, then check Ollama once
   useEffect(() => {
-    const poll = async () => {
+    const pollBackend = async () => {
       try {
         const r = await fetch(`${API}/health`)
         if (r.ok) {
           setBackendReady(true)
-          await fetchModels()
-          await fetchDocuments()
+          await checkOllama()
           return
         }
       } catch {}
-      setTimeout(poll, 2000)
+      setTimeout(pollBackend, 2000)
     }
-    poll()
+    pollBackend()
   }, [])
 
   const Page = PAGES[page] || ChatPage
+  const blocked = ollamaStatus === 'unreachable' && page !== 'settings'
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Sidebar />
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', background: 'var(--bg-base)' }}>
+      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', background: 'var(--bg-base)', position: 'relative' }}>
         {!backendReady ? (
           <div style={{
             flex: 1, display: 'flex', flexDirection: 'column',
@@ -59,7 +61,10 @@ export default function App() {
             <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Starting backend…</div>
           </div>
         ) : (
-          <Page />
+          <>
+            <Page />
+            {blocked && <OllamaBanner />}
+          </>
         )}
       </main>
     </div>

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useStore } from '../store'
-import { Send, Bot, User, Loader, Plus } from 'lucide-react'
+import { Send, Bot, User, Loader, Plus, AlertCircle } from 'lucide-react'
 
 function Message({ msg }) {
   const isUser = msg.role === 'user'
+  const isFailed = msg.failed
+
   return (
     <div style={{
       display: 'flex', gap: 12, padding: '16px 0',
@@ -12,23 +14,32 @@ function Message({ msg }) {
     }}>
       <div style={{
         width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-        background: isUser ? 'var(--bg-elevated)' : 'var(--accent-dim)',
-        border: `1px solid ${isUser ? 'var(--border)' : 'var(--accent)'}`,
+        background: isUser ? 'var(--bg-elevated)' : isFailed ? '#ef444415' : 'var(--accent-dim)',
+        border: `1px solid ${isUser ? 'var(--border)' : isFailed ? 'var(--red)40' : 'var(--accent)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         marginTop: 2,
       }}>
-        {isUser ? <User size={13} color="var(--text-secondary)" /> : <Bot size={13} color="var(--accent)" />}
+        {isUser
+          ? <User size={13} color="var(--text-secondary)" />
+          : isFailed
+            ? <AlertCircle size={13} color="var(--red)" />
+            : <Bot size={13} color="var(--accent)" />
+        }
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 500 }}>
           {isUser ? 'You' : 'Assistant'}
         </div>
         <div style={{
-          fontSize: 14, lineHeight: 1.65, color: 'var(--text-primary)',
+          fontSize: 14, lineHeight: 1.65,
+          color: isFailed ? 'var(--text-muted)' : 'var(--text-primary)',
           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-          fontFamily: msg.content?.includes('```') ? 'inherit' : 'inherit',
         }}>
-          {msg.content || (msg.streaming ? (
+          {isFailed ? (
+            <span style={{ color: 'var(--red)', fontSize: 13 }}>
+              Couldn't reach Ollama.
+            </span>
+          ) : msg.content || (msg.streaming ? (
             <span style={{ color: 'var(--text-muted)' }}>
               <Loader size={13} style={{ animation: 'spin 1s linear infinite', display: 'inline' }} />
             </span>
@@ -51,7 +62,6 @@ export default function ChatPage() {
   const activeConvId = useStore(s => s.activeConvId)
   const conversations = useStore(s => s.conversations)
   const createConversation = useStore(s => s.createConversation)
-  const setActiveConv = useStore(s => s.setActiveConv)
   const sendMessage = useStore(s => s.sendMessage)
   const streaming = useStore(s => s.streaming)
   const activeModel = useStore(s => s.activeModel)
@@ -159,7 +169,7 @@ export default function ChatPage() {
             background: 'var(--amber)15', border: '1px solid var(--amber)40',
             fontSize: 12, color: 'var(--amber)',
           }}>
-            No model selected - <button onClick={() => setPage('models')} style={{ color: 'var(--amber)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>download one</button>
+            No model selected — <button onClick={() => setPage('models')} style={{ color: 'var(--amber)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}>download one</button>
           </div>
         )}
         <div style={{

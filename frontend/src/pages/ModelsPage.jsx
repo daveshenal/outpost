@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../store'
-import { Download, Trash2, CheckCircle} from 'lucide-react'
+import { Download, Trash2, CheckCircle, PackageOpen } from 'lucide-react'
 
 const FEATURED = [
   { name: 'llama3.2:3b',        label: 'Llama 3.2 3B',        size: '2.0 GB', vram: '~3 GB', tag: 'Fast',        desc: 'Great for quick tasks, low VRAM' },
@@ -81,8 +81,55 @@ function SectionLabel({ text }) {
   )
 }
 
+function NoModelsPrompt({ onPull, pulling }) {
+  const starter = FEATURED[0] // llama3.2:3b
+  return (
+    <div style={{
+      margin: '0 0 28px',
+      padding: '20px',
+      borderRadius: 'var(--radius-lg)',
+      background: 'var(--accent-dim)',
+      border: '1px solid var(--accent)30',
+      display: 'flex', flexDirection: 'column', gap: 12,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: 10,
+          background: 'var(--bg-elevated)', border: '1px solid var(--accent)40',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <PackageOpen size={17} color="var(--accent)" />
+        </div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>No models installed yet</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+            Start with {starter.label} — {starter.size}, runs on {starter.vram} VRAM
+          </div>
+        </div>
+      </div>
+      {pulling ? (
+        <PullProgress progress={pulling} />
+      ) : (
+        <button
+          onClick={() => onPull(starter.name)}
+          style={{
+            alignSelf: 'flex-start',
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '7px 14px', borderRadius: 'var(--radius-sm)',
+            background: 'var(--accent)', color: 'white',
+            fontSize: 12, fontWeight: 500,
+          }}
+        >
+          <Download size={12} /> Download {starter.label}
+        </button>
+      )}
+    </div>
+  )
+}
+
 export default function ModelsPage() {
   const models = useStore(s => s.models)
+  const ollamaStatus = useStore(s => s.ollamaStatus)
   const fetchModels = useStore(s => s.fetchModels)
   const pullModel = useStore(s => s.pullModel)
   const deleteModel = useStore(s => s.deleteModel)
@@ -96,6 +143,7 @@ export default function ModelsPage() {
 
   const chatModels = models.filter(m => !isEmbedModel(m.name))
   const embedModels = models.filter(m => isEmbedModel(m.name))
+  const noModels = models.length === 0 && ollamaStatus === 'connected'
 
   const isInstalled = (name) => models.some(m => m.name === name || m.name.startsWith(name.split(':')[0]))
 
@@ -121,6 +169,14 @@ export default function ModelsPage() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+
+        {/* Fresh install prompt */}
+        {noModels && (
+          <NoModelsPrompt
+            onPull={handlePull}
+            pulling={pulling['llama3.2:3b']}
+          />
+        )}
 
         {/* Installed — Chat Models */}
         {chatModels.length > 0 && (

@@ -21,6 +21,7 @@ function saveConversations(conversations) {
 export const useStore = create((set, get) => ({
   page: 'chat',
   backendReady: false,
+  ollamaStatus: 'checking', // 'checking' | 'connected' | 'unreachable'
   models: [],
   documents: [],
   activeModel: localStorage.getItem('activeModel') || null,
@@ -36,26 +37,64 @@ export const useStore = create((set, get) => ({
     set({ activeModel: model })
   },
 
+  // Called by any failed request that indicates Ollama is down
+  triggerOllamaError: () => {
+    set({ ollamaStatus: 'unreachable' })
+  },
+
+  // Single check + refetch on recovery
+  checkOllama: async () => {
+    try {
+      const r = await fetch(`${API}/models`)
+      const data = await r.json()
+      if (data.error) throw new Error(data.error)
+
+      const models = data.models || []
+      set({ ollamaStatus: 'connected', models })
+
+      const isEmbedModel = (name) => name.toLowerCase().includes('embed')
+      const chatModels = models.filter(m => !isEmbedModel(m.name))
+      const { activeModel } = get()
+      if (!activeModel && chatModels.length) {
+        get().setActiveModel(chatModels[0].name)
+      } else if (activeModel && isEmbedModel(activeModel) && chatModels.length) {
+        get().setActiveModel(chatModels[0].name)
+      }
+
+      // Also refetch documents on recovery
+      await get().fetchDocuments()
+      return true
+    } catch {
+      set({ ollamaStatus: 'unreachable' })
+      return false
+    }
+  },
+
   fetchModels: async () => {
     try {
       const r = await fetch(`${API}/models`)
       const data = await r.json()
+
+      if (data.error) {
+        get().triggerOllamaError()
+        return
+      }
+
       const models = data.models || []
       set({ models })
-  
+
       const isEmbedModel = (name) => name.toLowerCase().includes('embed')
-  
       const chatModels = models.filter(m => !isEmbedModel(m.name))
       const { activeModel } = get()
-  
+
       if (!activeModel && chatModels.length) {
-        // No model selected yet — pick first chat model
         get().setActiveModel(chatModels[0].name)
       } else if (activeModel && isEmbedModel(activeModel) && chatModels.length) {
-        // Current active is an embed model — swap to first chat model
         get().setActiveModel(chatModels[0].name)
       }
-    } catch {}
+    } catch {
+      get().triggerOllamaError()
+    }
   },
 
   fetchDocuments: async () => {
@@ -67,47 +106,69 @@ export const useStore = create((set, get) => ({
   },
 
   pullModel: async (name, onProgress) => {
-    const r = await fetch(`${API}/models/pull`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    })
-    const reader = r.body.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop()
-      for (const line of lines) {
-        if (!line) continue
-        try {
-          onProgress?.(JSON.parse(line))
-        } catch {}
+    try {
+      const r = await fetch(`${API}/models/pull`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      const reader = r.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+        for (const line of lines) {
+          if (!line) continue
+          try {
+            onProgress?.(JSON.parse(line))
+          } catch {}
+        }
       }
+      await get().fetchModels()
+    } catch {
+      get().triggerOllamaError()
+      throw new Error('ollama_unreachable')
     }
-    await get().fetchModels()
   },
 
   deleteModel: async (name) => {
-    await fetch(`${API}/models/${encodeURIComponent(name)}`, { method: 'DELETE' })
-    if (get().activeModel === name) {
-      localStorage.removeItem('activeModel')
-      set({ activeModel: null })
+    try {
+      await fetch(`${API}/models/${encodeURIComponent(name)}`, { method: 'DELETE' })
+      if (get().activeModel === name) {
+        localStorage.removeItem('activeModel')
+        set({ activeModel: null })
+      }
+      await get().fetchModels()
+    } catch {
+      get().triggerOllamaError()
     }
-    await get().fetchModels()
   },
 
   ingestDocument: async (file, onProgress) => {
-    onProgress?.(30)
-    const form = new FormData()
-    form.append('file', file)
-    onProgress?.(60)
-    await fetch(`${API}/documents/ingest`, { method: 'POST', body: form })
-    onProgress?.(100)
-    await get().fetchDocuments()
+    try {
+      onProgress?.(30)
+      const form = new FormData()
+      form.append('file', file)
+      onProgress?.(60)
+      const r = await fetch(`${API}/documents/ingest`, { method: 'POST', body: form })
+      const data = await r.json()
+      if (data.error) {
+        // Could be Ollama down (embedding failed) or a parse error
+        if (data.error.toLowerCase().includes('ollama') || data.error.toLowerCase().includes('connect')) {
+          get().triggerOllamaError()
+        }
+        throw new Error(data.error)
+      }
+      onProgress?.(100)
+      await get().fetchDocuments()
+    } catch (e) {
+      if (e.message === 'Failed to fetch') get().triggerOllamaError()
+      throw e
+    }
   },
 
   deleteDocument: async (docId) => {
@@ -208,7 +269,23 @@ export const useStore = create((set, get) => ({
       saveConversations(final)
       set({ conversations: final, streaming: false })
     } catch {
+      // Mark the assistant message as failed and trigger ollama error
+      const final = [...get().conversations]
+      const idx = final.findIndex(c => c.id === convId)
+      if (idx !== -1) {
+        const c = { ...final[idx] }
+        c.messages = [...c.messages]
+        c.messages[c.messages.length - 1] = {
+          role: 'assistant',
+          content: '',
+          failed: true,
+        }
+        final[idx] = c
+        saveConversations(final)
+        set({ conversations: final })
+      }
       set({ streaming: false })
+      get().triggerOllamaError()
     }
   },
 }))
